@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const pool = require("./db/database");
 const productRoutes = require("./routes/productRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Test route
 app.get("/", (req, res) => {
