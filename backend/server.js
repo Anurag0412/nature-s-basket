@@ -1,9 +1,18 @@
+const path = require("path");
+const dotenv = require("dotenv");
+
+// Load .env from the project root
+dotenv.config({
+    path: path.resolve(__dirname, "../.env")
+});
+
 const express = require("express");
 const cors = require("cors");
 
 const pool = require("./db/database");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -16,6 +25,7 @@ app.use(express.json());
 // Routes
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/auth", authRoutes);
 
 // Test route
 app.get("/", (req, res) => {
