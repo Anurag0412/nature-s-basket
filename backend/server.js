@@ -13,6 +13,7 @@ const pool = require("./db/database");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const authRoutes = require("./routes/authRoutes");
+const salesRoutes = require("./routes/salesRoutes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/sales", salesRoutes);
 
 // Test route
 app.get("/", (req, res) => {
@@ -55,6 +57,10 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
