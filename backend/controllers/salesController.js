@@ -28,7 +28,7 @@ const toRupeesString = (paise) => {
 /**
  * POST /api/sales
  * Create a bill / sale transaction.
- * 
+ *
  * Requirements:
  * - Requires JWT authentication and 'cashier' role.
  * - Accept body with `items: [{ product_id, quantity }]`.
@@ -268,7 +268,7 @@ const createSale = async (req, res) => {
 /**
  * GET /api/sales/:id
  * Retrieve a single sale by ID including cashier information and line items.
- * 
+ *
  * Access control:
  * - Cashier: may only view their own sales (returns 404 if sale doesn't exist or belongs to another cashier).
  * - Owner: may view any sale.
@@ -306,7 +306,7 @@ const getSaleById = async (req, res) => {
 
         if (role === "owner") {
             saleQuery = `
-                SELECT 
+                SELECT
                     s.sale_id,
                     s.cashier_id,
                     u.name AS cashier_name,
@@ -321,7 +321,7 @@ const getSaleById = async (req, res) => {
         } else if (role === "cashier") {
             // Cashier can only see their own sales; returning 404 avoids leaking existence of another cashier's sale
             saleQuery = `
-                SELECT 
+                SELECT
                     s.sale_id,
                     s.cashier_id,
                     u.name AS cashier_name,
@@ -353,7 +353,7 @@ const getSaleById = async (req, res) => {
 
         // Fetch line items with product names
         const itemsQuery = `
-            SELECT 
+            SELECT
                 si.sale_item_id,
                 si.sale_id,
                 si.product_id,
@@ -387,12 +387,12 @@ const getSaleById = async (req, res) => {
 /**
  * GET /api/sales
  * Retrieve paginated sales list.
- * 
+ *
  * Access control:
  * - Cashier: can only view their own sales.
  * - Owner: can view all sales.
  * - Staff: forbidden (403).
- * 
+ *
  * Pagination:
  * - Query params: page (default 1), limit (default 10, max 100).
  * - Stable sorting: newest first (sale_date DESC, sale_id DESC).
@@ -452,7 +452,7 @@ const getAllSales = async (req, res) => {
             countParams = [];
 
             listQuery = `
-                SELECT 
+                SELECT
                     s.sale_id,
                     s.cashier_id,
                     u.name AS cashier_name,
@@ -470,7 +470,7 @@ const getAllSales = async (req, res) => {
             countParams = [userId];
 
             listQuery = `
-                SELECT 
+                SELECT
                     s.sale_id,
                     s.cashier_id,
                     u.name AS cashier_name,

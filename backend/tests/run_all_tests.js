@@ -4,7 +4,8 @@ const path = require("path");
 const testFiles = [
     "auth_product_category.test.js",
     "inventory.test.js",
-    "sales.test.js"
+    "sales.test.js",
+    "analytics.test.js"
 ];
 
 console.log("=================================================");
