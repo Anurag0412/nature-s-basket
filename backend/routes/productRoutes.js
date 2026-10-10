@@ -7,14 +7,16 @@ const {
     updateProduct,
     updateProductStatus
 } = require("../controllers/productController");
+const { authenticateToken, authorizeRoles } = require("../middleware/authMiddleware");
 
 // Product routes
-router.get("/", getAllProducts);
-router.post("/", createProduct);
+// Read operations: accessible by all authenticated roles (cashier, staff, owner)
+router.get("/", authenticateToken, getAllProducts);
+router.get("/:id", authenticateToken, getProductById);
 
-router.get("/:id", getProductById);
-router.put("/:id", updateProduct);
-
-router.patch("/:id/status", updateProductStatus);
+// Write operations: strictly restricted to owner
+router.post("/", authenticateToken, authorizeRoles("owner"), createProduct);
+router.put("/:id", authenticateToken, authorizeRoles("owner"), updateProduct);
+router.patch("/:id/status", authenticateToken, authorizeRoles("owner"), updateProductStatus);
 
 module.exports = router;

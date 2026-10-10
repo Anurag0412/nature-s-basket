@@ -7,14 +7,16 @@ const {
     updateCategory,
     updateCategoryStatus
 } = require("../controllers/categoryController");
+const { authenticateToken, authorizeRoles } = require("../middleware/authMiddleware");
 
 // Category routes
-router.get("/", getAllCategories);
-router.post("/", createCategory);
+// Read operations: accessible by all authenticated roles (cashier, staff, owner)
+router.get("/", authenticateToken, getAllCategories);
+router.get("/:id", authenticateToken, getCategoryById);
 
-router.get("/:id", getCategoryById);
-router.put("/:id", updateCategory);
-
-router.patch("/:id/status", updateCategoryStatus);
+// Write operations: strictly restricted to owner
+router.post("/", authenticateToken, authorizeRoles("owner"), createCategory);
+router.put("/:id", authenticateToken, authorizeRoles("owner"), updateCategory);
+router.patch("/:id/status", authenticateToken, authorizeRoles("owner"), updateCategoryStatus);
 
 module.exports = router;
