@@ -39,9 +39,12 @@ Nature's Basket organizes retail operations into tailored experiences for three 
 
 ## 2. Technology Stack
 
-### Frontend *(Design Phase)*
-- **Framework & Language:** React and JavaScript.
-- **Design & Prototyping:** Google Stitch (used to develop, iterate, and refine UI screen layouts and generate frontend design code).
+### Frontend *(Implemented)*
+- **Framework & Language:** React (v19.x), JavaScript (ESModules).
+- **Build Tool & Dev Server:** Vite (v8.x) with `@vitejs/plugin-react` and local API proxy to `http://localhost:5000`.
+- **Routing:** React Router DOM (v7.x) with role-protected client-side navigation.
+- **Styling Architecture:** Vanilla CSS design tokens (`theme.css`) implementing the verified Nature's Basket botanical design system (parchment canvas `#FDFBF7`, forest green `#2C5F2D`, burgundy `#8A3033`, Playfair Display editorial typography).
+- **Linter:** Oxlint (high-performance static code analysis).
 
 ### Backend *(Implemented)*
 - **Runtime:** Node.js (CommonJS modules).
@@ -105,13 +108,41 @@ Natures_basket/
 │   ├── schema.sql                   # Core table schemas and relational constraints
 │   └── seed.sql                     # Initial seed data for store setup
 ├── docs/                            # Project documentation assets
-└── frontend/                        # Designated React frontend client application
+└── frontend/                        # React + Vite frontend client application
+    ├── public/                      # Static assets
+    ├── src/
+    │   ├── api/                     # Centralized API service modules
+    │   │   ├── analyticsApi.js      # Executive analytics client
+    │   │   ├── authApi.js           # Authentication & profile client
+    │   │   ├── categoryApi.js       # Category management client
+    │   │   ├── client.js            # Base HTTP client with Bearer auth injection
+    │   │   ├── inventoryApi.js      # Stock management client
+    │   │   ├── productApi.js        # Catalog management client
+    │   │   └── salesApi.js          # POS checkout & sales history client
+    │   ├── components/              # Shared UI & layout components
+    │   │   ├── layout/              # AppLayout, TopNavbar, PageHeader, ProtectedRoute
+    │   │   └── ui/                  # Button, Badge, Modal, DataTable, MetricCard, etc.
+    │   ├── context/                 # AuthContext (JWT session) & ToastContext
+    │   ├── screens/                 # Seven operational role-based screens
+    │   │   ├── LoginScreen.jsx      # Branded authentication screen
+    │   │   ├── DashboardScreen.jsx  # Owner executive analytics & sales trend
+    │   │   ├── ProductsScreen.jsx   # Product catalog CRUD with search/filters
+    │   │   ├── CategoriesScreen.jsx # Category CRUD and status toggles
+    │   │   ├── InventoryScreen.jsx  # Stock levels, low-stock alerts & restocking
+    │   │   ├── PosScreen.jsx        # POS high-speed register & instant receipt
+    │   │   └── SalesHistoryScreen.jsx # Historical audit ledger & itemized receipts
+    │   ├── styles/                  # Heritage botanical design tokens (theme.css)
+    │   ├── App.jsx                  # Application routes with ProtectedRoute
+    │   └── main.jsx                 # React root mounting
+    ├── index.html                   # HTML entrypoint with Google Fonts
+    ├── package.json                 # Frontend scripts and dependencies
+    └── vite.config.js               # Vite config with backend proxy (/api -> :5000)
 ```
 
-> **Note on Directories:**
-> - `frontend/` is reserved for the React user interface. UI screens are currently design-stage assets developed in Stitch and will be integrated into this directory.
-> - `docs/` is designated for architectural diagrams, design specifications, and user documentation.
-> - In `database/`, the SQL files (`schema.sql`, `seed.sql`, `queries.sql`) serve as designated repository scripts corresponding to the tables and data hosted in the PostgreSQL database.
+> **Note on Architecture:**
+> - `frontend/` houses the complete React + Vite client, communicating via relative `/api` calls proxied to the Express backend.
+> - `database/` houses standard SQL scripts (`schema.sql`, `seed.sql`, `queries.sql`) matching the PostgreSQL database schema and initial starter data.
+> - `docs/` is designated for design specifications and architecture references.
 
 ---
 
@@ -371,26 +402,25 @@ When executed against the local PostgreSQL test database, all 4 test suites pass
 
 ---
 
-## 8. Frontend Design Progress
+## 8. Frontend Implementation
 
-The frontend client is currently in the **design and prototyping phase**. Screen designs, information architecture, and UI components are being developed and refined using **Stitch** before integration into the `frontend/` React codebase.
+The frontend client is fully implemented in React 19 and Vite 8, featuring an artisanal botanical design system and role-scoped workflows.
 
-### Approved Design System & Visual Direction
+### Design System & Visual Direction
 - **Atmosphere:** Warm, artisanal, and reliable grocery aesthetic.
-- **Color Palette:** Warm cream/parchment background (`#F9F6F0`), deep forest green primary accents (`#1B4332`), and muted burgundy highlights (`#7A2832`).
-- **Typography:** Editorial serif typography for headings paired with crisp, clean modern sans-serif fonts for data readability.
-- **Illustrations:** Tasteful botanical motifs and natural accents.
-- **Layout:** Responsive horizontal navigation bar, clear status tags, and high-density, accessible tabular views for product and inventory management.
+- **Color Palette:** Warm parchment background (`#FDFBF7`), deep forest green primary accents (`#2C5F2D`), muted burgundy highlights (`#8A3033`), and brand-tinted dark charcoal text (`#1F2421`).
+- **Typography:** Editorial serif typography (*Playfair Display*) for page headings, script branding (*Fleur De Leah*) for wordmarks, paired with crisp sans-serif (*Plus Jakarta Sans*) for tabular operational data.
+- **Micro-Interactions:** Subtle CSS micro-animations, toast notifications, responsive mobile drawer, and accessible dialogs with escape-key termination and backdrop containment.
 - **Table Philosophy:** Management tables intentionally omit product photographs to prioritize scannability, operational speed, and dense data display.
 
-### Screen Concept Status
-- **Login Screen:** Approved visual direction featuring branded botanical accents, clean credential inputs, and role redirection flow.
-- **Owner Dashboard:** Approved visual concept displaying revenue overview KPI tiles, daily revenue trend charts, quick reorder counters, and cashier performance summaries.
-- **Products Management:** Refined concept featuring category filters, price and stock badges, search bars, and modal forms for adding/editing items.
-- **Categories Management:** Refined layout showing category listing, active item count indicators, and quick status toggling.
-- **Inventory & Stock Management:** Refined concept highlighting low-stock items with visual deficit indicators and quick-restock modal actions.
-
-> **Status Notice:** These screens represent design-stage deliverables. Frontend code in `frontend/` is planned for upcoming implementation sprints and is not yet connected to the backend API.
+### Implemented Screens
+1. **Login Screen (`/login`)**: Branded credentials form, password visibility toggle, quick-fill development operator selector, and role-based redirector.
+2. **Owner Dashboard (`/dashboard`)**: Executive analytics overview tiles (Gross Revenue, Orders, Basket Size, Units Dispensed), SVG sales trajectory area chart, best-selling product rankings, cashier throughput audit, and flexible date-range filters.
+3. **Products Management (`/products`)**: Real-time product catalog table with search, category filtering, stock badges, and modal forms for adding and editing products.
+4. **Categories Management (`/categories`)**: Category listing with product counts, status badges, and modal forms for creating and editing categories.
+5. **Inventory & Stock (`/inventory`)**: Real-time inventory table with low-stock deficit indicators (`reorder_level - stock_quantity`), query filtering, and atomic row-locked restocking dialogs.
+6. **Point of Sale / POS Billing (`/pos`)**: High-speed cashier checkout terminal with catalog search, responsive cart drawer, quantity limit enforcement, atomic checkout settlement, and printable receipt generation.
+7. **Sales History & Receipts (`/sales`)**: Paginated historical transaction ledger with role isolation (Cashier views own sales; Owner views all store sales; Staff forbidden), search filters, and itemized receipt modal with line items and print support.
 
 ---
 
@@ -453,28 +483,28 @@ npm install
    ```sql
    CREATE DATABASE "Nature_s_Basket";
    ```
-3. Connect to the `Nature_s_Basket` database and run the schema and seed scripts to generate the tables (`users`, `categories`, `products`, `sales`, `sale_items`) and starter data.
-4. Set development password hashes for the default seeded users:
+3. Initialize the schema and starter seed data using the repository scripts:
+   ```bash
+   # From the project root:
+   psql -U postgres -d Nature_s_Basket -f database/schema.sql
+   psql -U postgres -d Nature_s_Basket -f database/seed.sql
+   ```
+4. Set development passwords for the seeded users:
    ```bash
    cd backend
    node scripts/updateSeedPasswords.js
    ```
-   Follow the interactive prompt to set secure development passwords for each seeded user (`rahul.cashier`, `priya.cashier`, `amit.staff`, `neha.staff`, `owner.admin`).
+   Follow the interactive prompt to set local development passwords for each seeded user (`rahul.cashier`, `priya.cashier`, `amit.staff`, `neha.staff`, `owner.admin`).
 
 ---
 
 ### Step 5: Start the Backend Server
 
-To start the server using Node.js:
 ```bash
 cd backend
-node server.js
-```
-
-Or for development with automatic reload using `nodemon`:
-```bash
-cd backend
-npx nodemon server.js
+npm start
+# Or for development with automatic reload via nodemon:
+npm run dev
 ```
 
 The server will initialize on port 5000:
@@ -483,17 +513,40 @@ The server will initialize on port 5000:
 🚀 Server running on http://localhost:5000
 ```
 
-Verify the server is reachable by navigating to:
+Verify backend health by navigating to:
 - `http://localhost:5000/` (Returns API health status)
 - `http://localhost:5000/api/test-db` (Confirms live PostgreSQL connection)
 
 ---
 
-### Step 6: Run the Test Suite
-Ensure the database is running and execute:
+### Step 6: Start the Frontend Application
+
+In a separate terminal, start the Vite development server:
+
 ```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend will start at:
+- `http://localhost:5173/`
+
+Vite is pre-configured with a development proxy that forwards all `/api/*` requests directly to `http://localhost:5000`.
+
+---
+
+### Step 7: Run Automated Verification & Tests
+
+```bash
+# 1. Run all backend regression and integration tests (62 tests):
 cd backend
 npm test
+
+# 2. Run frontend lint and production bundle checks:
+cd ../frontend
+npm run lint
+npm run build
 ```
 
 ---
