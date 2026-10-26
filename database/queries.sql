@@ -1,26 +1,15 @@
--- ============================================================================
--- Nature's Basket — Reference & Operational SQL Queries
--- Useful read-only queries for administrative reporting, diagnostics,
--- and verifying business functionality
--- ============================================================================
---
 -- QUERY INDEX
--- Line 24: UNION ALL & COUNT (Query 1) - Table record diagnostics across 5 tables
--- Line 39: SELECT & ORDER BY (Query 2) - Active store personnel sorted by role
--- Line 54: INNER JOIN (Query 3) - Product catalog with category names
--- Line 72: WHERE & Expressions (Query 4) - Low-stock items below reorder level
--- Line 91: GROUP BY & Pagination (Query 5) - Sales register with LIMIT/OFFSET
--- Line 111: Multi-Table JOIN (Query 6) - Itemized bill lookup joining 4 tables
--- Line 133: HAVING & SUM (Query 7) - Best-selling merchandise ranking
--- Line 152: CASE & Aggregate Functions (Query 8) - Cashier throughput audit
--- Line 173: CTE (WITH) & Date Functions (Query 9) - 30-day continuous revenue
--- ============================================================================
+-- Line 13: Query 1 (UNION ALL, COUNT) - System table record counts
+-- Line 24: Query 2 (SELECT, ORDER BY) - Store personnel directory
+-- Line 35: Query 3 (INNER JOIN) - Product catalog with category names
+-- Line 49: Query 4 (WHERE) - Low-stock deficit report
+-- Line 64: Query 5 (GROUP BY, LIMIT/OFFSET) - Paginated sales register
+-- Line 79: Query 6 (Multi-Table JOIN) - Itemized receipt inspection
+-- Line 97: Query 7 (HAVING, SUM) - Best-selling merchandise ranking
+-- Line 112: Query 8 (CASE, Aggregates) - Cashier throughput audit
+-- Line 129: Query 9 (CTE, Date Functions) - 30-day continuous revenue
 
--- ----------------------------------------------------------------------------
--- 1. System & Table Diagnostics
--- Concepts: UNION ALL, Aggregate Functions (COUNT), Column Aliasing
--- Check table record counts across all application tables
--- ----------------------------------------------------------------------------
+-- 1. System & Table Diagnostics: Count records across tables (UNION ALL, COUNT)
 SELECT 'users' AS table_name, COUNT(*) AS total_records FROM users
 UNION ALL
 SELECT 'categories', COUNT(*) FROM categories
@@ -31,11 +20,7 @@ SELECT 'sales', COUNT(*) FROM sales
 UNION ALL
 SELECT 'sale_items', COUNT(*) FROM sale_items;
 
--- ----------------------------------------------------------------------------
--- 2. User Accounts & Role Audit
--- Concepts: SELECT, ORDER BY (Multi-column Ascending)
--- List all active store personnel with roles (passwords omitted)
--- ----------------------------------------------------------------------------
+-- 2. User Accounts & Role Audit: List store personnel (SELECT, ORDER BY)
 SELECT
     user_id,
     name,
@@ -46,11 +31,7 @@ SELECT
 FROM users
 ORDER BY role ASC, user_id ASC;
 
--- ----------------------------------------------------------------------------
--- 3. Product Catalog with Category Join
--- Concepts: INNER JOIN, Table Aliasing, ORDER BY
--- Complete inventory listing with parent category and formatted prices
--- ----------------------------------------------------------------------------
+-- 3. Product Catalog: List products with category names (INNER JOIN)
 SELECT
     p.product_id,
     p.product_name,
@@ -64,11 +45,7 @@ FROM products p
 JOIN categories c ON p.category_id = c.category_id
 ORDER BY c.category_name ASC, p.product_name ASC;
 
--- ----------------------------------------------------------------------------
--- 4. Low-Stock Alert & Inventory Deficit Report
--- Concepts: WHERE (Comparison Filter), Arithmetic Expressions, INNER JOIN
--- Identifies products at or below their reorder threshold with restocking deficit
--- ----------------------------------------------------------------------------
+-- 4. Low-Stock Alert: Filter products below reorder level (WHERE, Expressions)
 SELECT
     p.product_id,
     p.product_name,
@@ -83,11 +60,7 @@ JOIN categories c ON p.category_id = c.category_id
 WHERE p.stock_quantity <= p.reorder_level
 ORDER BY p.stock_quantity ASC, deficit_quantity DESC;
 
--- ----------------------------------------------------------------------------
--- 5. Paginated Sales Transaction Register
--- Concepts: GROUP BY, Aggregate Functions (COUNT), LEFT JOIN, LIMIT & OFFSET
--- Historical customer checkout bills joined with cashier attribution
--- ----------------------------------------------------------------------------
+-- 5. Paginated Sales Register: Historical transactions with line item counts (GROUP BY, LIMIT/OFFSET)
 SELECT
     s.sale_id,
     s.sale_date,
@@ -102,12 +75,7 @@ GROUP BY s.sale_id, s.sale_date, u.name, u.username, s.total_amount
 ORDER BY s.sale_date DESC, s.sale_id DESC
 LIMIT 10 OFFSET 0;
 
--- ----------------------------------------------------------------------------
--- 6. Itemized Receipt Inspection (Single Bill Lookup)
--- Concepts: Multi-Table JOIN (4 Tables), WHERE (Equality Filter), ORDER BY
--- Reconstructs the complete bill invoice with product names and subtotals
--- (Replace :target_sale_id with desired integer, e.g., 69 or 72)
--- ----------------------------------------------------------------------------
+-- 6. Itemized Receipt Inspection: Single bill lookup with product details (Multi-Table JOIN, WHERE)
 SELECT
     s.sale_id,
     s.sale_date,
@@ -125,11 +93,7 @@ JOIN products p ON si.product_id = p.product_id
 WHERE s.sale_id = 72 -- Or target sale_id
 ORDER BY si.sale_item_id ASC;
 
--- ----------------------------------------------------------------------------
--- 7. Best-Selling Products Ranking (Top Merchandise)
--- Concepts: HAVING (Aggregate Filter), Aggregate Functions (SUM), COALESCE, LIMIT
--- Ranks items by cumulative units sold and gross revenue generated
--- ----------------------------------------------------------------------------
+-- 7. Best-Selling Products Ranking: Top merchandise by units and revenue (HAVING, SUM, LIMIT)
 SELECT
     p.product_id,
     p.product_name,
@@ -144,11 +108,7 @@ HAVING COALESCE(SUM(si.quantity), 0) > 0
 ORDER BY total_units_sold DESC, gross_revenue DESC
 LIMIT 5;
 
--- ----------------------------------------------------------------------------
--- 8. Cashier Register Performance & Throughput Audit
--- Concepts: CASE Expression (Conditional Logic), Aggregate Functions (COUNT, SUM), Numeric Functions (ROUND)
--- Operator efficiency, checkout bill count, and revenue collected
--- ----------------------------------------------------------------------------
+-- 8. Cashier Register Performance: Throughput and average basket audit (CASE, COUNT, SUM)
 SELECT
     u.user_id AS cashier_id,
     u.name AS cashier_name,
@@ -165,11 +125,7 @@ WHERE u.role = 'cashier'
 GROUP BY u.user_id, u.name, u.username
 ORDER BY total_revenue_collected DESC, bills_processed DESC;
 
--- ----------------------------------------------------------------------------
--- 9. Daily Revenue & Volume Trajectory (Last 30 Days with Zero Padding)
--- Concepts: Common Table Expressions (WITH / CTE), Date/Time Functions (generate_series, CURRENT_DATE, INTERVAL), TO_CHAR
--- PostgreSQL continuous calendar series aggregation
--- ----------------------------------------------------------------------------
+-- 9. Daily Revenue Trajectory: Continuous calendar series with zero padding (CTE, Date Functions)
 WITH date_series AS (
     SELECT generate_series(
         CURRENT_DATE - INTERVAL '29 days',
