@@ -17,6 +17,7 @@ import {
   getTopProducts,
   getCashierPerformance,
 } from '../api/analyticsApi';
+import { formatCurrency } from '../utils/currencyUtils';
 
 /**
  * Format a Date object to YYYY-MM-DD
@@ -422,7 +423,7 @@ export default function DashboardScreen() {
           <MetricStrip>
             <MetricCard
               label="Total Store Revenue"
-              value={`$${overview ? Number(overview.total_revenue || 0).toFixed(2) : '0.00'}`}
+              value={formatCurrency(overview ? overview.total_revenue : 0)}
               hint={`${overview ? overview.number_of_bills : 0} customer bills settled`}
               variant="forest"
             />
@@ -433,7 +434,7 @@ export default function DashboardScreen() {
             />
             <MetricCard
               label="Average Basket Size"
-              value={`$${overview ? Number(overview.average_bill_value || 0).toFixed(2) : '0.00'}`}
+              value={formatCurrency(overview ? overview.average_bill_value : 0)}
               hint="Mean transaction revenue"
               variant="burgundy"
             />
@@ -489,7 +490,7 @@ export default function DashboardScreen() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  Revenue ($)
+                  Revenue (₹)
                 </button>
                 <button
                   type="button"
@@ -541,7 +542,7 @@ export default function DashboardScreen() {
                     const y = chartHeight - paddingY - ratio * (chartHeight - paddingY * 2);
                     const labelVal =
                       trendMetric === 'revenue'
-                        ? `$${(ratio * trendMetrics.maxRev).toFixed(0)}`
+                        ? `₹${Math.round(ratio * trendMetrics.maxRev).toLocaleString('en-IN')}`
                         : Math.round(ratio * trendMetrics.maxUnits);
 
                     return (
@@ -668,7 +669,7 @@ export default function DashboardScreen() {
                       {points[hoveredTrendPoint].data.date}
                     </div>
                     <div>
-                      Revenue: <strong>${Number(points[hoveredTrendPoint].data.revenue).toFixed(2)}</strong>
+                      Revenue: <strong>{formatCurrency(points[hoveredTrendPoint].data.revenue)}</strong>
                     </div>
                     <div>
                       Orders: {points[hoveredTrendPoint].data.number_of_bills} bills | Units: {points[hoveredTrendPoint].data.units_sold}
@@ -762,7 +763,7 @@ export default function DashboardScreen() {
                               fontSize: '13.5px',
                             }}
                           >
-                            ${Number(p.revenue).toFixed(2)}
+                            {formatCurrency(p.revenue)}
                           </span>
                         </div>
 
@@ -884,7 +885,7 @@ export default function DashboardScreen() {
                               fontVariantNumeric: 'tabular-nums',
                             }}
                           >
-                            ${Number(c.average_bill_value).toFixed(2)}
+                            {formatCurrency(c.average_bill_value)}
                           </td>
                           <td
                             style={{
@@ -895,7 +896,7 @@ export default function DashboardScreen() {
                               color: hasRevenue ? 'var(--color-forest)' : 'var(--text-muted)',
                             }}
                           >
-                            ${Number(c.total_revenue).toFixed(2)}
+                            {formatCurrency(c.total_revenue)}
                           </td>
                         </tr>
                       );

@@ -17,6 +17,7 @@ import { useAuth } from '../context/useAuth';
 import { useToast } from '../context/useToast';
 import { getInventory, updateStock } from '../api/inventoryApi';
 import { getCategories } from '../api/categoryApi';
+import { formatCurrency } from '../utils/currencyUtils';
 
 const PAGE_SIZE = 10;
 
@@ -285,7 +286,7 @@ export default function InventoryScreen() {
       align: 'right',
       render: (val) => (
         <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-          ${Number(val).toFixed(2)}
+          {formatCurrency(val)}
         </span>
       ),
     },
@@ -663,7 +664,7 @@ export default function InventoryScreen() {
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: 2 }}>
                 Category: <strong>{selectedProduct.category_name}</strong> • Unit Price:{' '}
-                <strong>${Number(selectedProduct.price).toFixed(2)}</strong>
+                <strong>{formatCurrency(selectedProduct.price)}</strong>
               </div>
 
               <div

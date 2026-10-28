@@ -5,7 +5,8 @@ const {
     getProductById,
     createProduct,
     updateProduct,
-    updateProductStatus
+    updateProductStatus,
+    deleteProduct
 } = require("../controllers/productController");
 const { authenticateToken, authorizeRoles } = require("../middleware/authMiddleware");
 
@@ -18,5 +19,6 @@ router.get("/:id", authenticateToken, getProductById);
 router.post("/", authenticateToken, authorizeRoles("owner"), createProduct);
 router.put("/:id", authenticateToken, authorizeRoles("owner"), updateProduct);
 router.patch("/:id/status", authenticateToken, authorizeRoles("owner"), updateProductStatus);
+router.delete("/:id", authenticateToken, authorizeRoles("owner"), deleteProduct);
 
 module.exports = router;

@@ -16,6 +16,7 @@ import ErrorState from '../components/ui/ErrorState';
 import { useAuth } from '../context/useAuth';
 import { useToast } from '../context/useToast';
 import { getAllSales, getSaleById } from '../api/salesApi';
+import { formatCurrency } from '../utils/currencyUtils';
 
 /**
  * Sales History & Receipts Screen
@@ -288,7 +289,7 @@ export default function SalesHistoryScreen() {
             color: 'var(--color-forest)',
           }}
         >
-          ${Number(val || 0).toFixed(2)}
+          {formatCurrency(val)}
         </span>
       ),
     },
@@ -403,7 +404,7 @@ export default function SalesHistoryScreen() {
         />
         <MetricCard
           label="Current Page Volume"
-          value={`$${metrics.pageRevenue}`}
+          value={formatCurrency(metrics.pageRevenue)}
           hint={`${sales.length} transactions displayed`}
         />
         <MetricCard
@@ -662,7 +663,7 @@ export default function SalesHistoryScreen() {
                           fontVariantNumeric: 'tabular-nums',
                         }}
                       >
-                        ${Number(it.unit_price).toFixed(2)}
+                        {formatCurrency(it.unit_price)}
                       </td>
                       <td
                         style={{
@@ -672,7 +673,7 @@ export default function SalesHistoryScreen() {
                           fontWeight: 600,
                         }}
                       >
-                        ${Number(it.subtotal).toFixed(2)}
+                        {formatCurrency(it.subtotal)}
                       </td>
                     </tr>
                   ))
@@ -713,7 +714,7 @@ export default function SalesHistoryScreen() {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                ${Number(receiptData.total_amount).toFixed(2)}
+                {formatCurrency(receiptData.total_amount)}
               </span>
             </div>
           </div>

@@ -13,6 +13,7 @@ import { useToast } from '../context/useToast';
 import { getProducts } from '../api/productApi';
 import { getCategories } from '../api/categoryApi';
 import { createSale } from '../api/salesApi';
+import { formatCurrency } from '../utils/currencyUtils';
 
 export default function PosScreen() {
   const { user } = useAuth();
@@ -366,7 +367,7 @@ export default function PosScreen() {
                           </div>
                         </td>
                         <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                          ${Number(prod.price).toFixed(2)}
+                          {formatCurrency(prod.price)}
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <Badge
@@ -521,7 +522,7 @@ export default function PosScreen() {
                           {item.product_name}
                         </div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          ${item.price.toFixed(2)} each • Max: {item.stock_quantity}
+                          {formatCurrency(item.price)} each • Max: {item.stock_quantity}
                         </div>
                       </div>
 
@@ -577,7 +578,7 @@ export default function PosScreen() {
                           fontSize: '14px',
                         }}
                       >
-                        ${lineTotal.toFixed(2)}
+                        {formatCurrency(lineTotal)}
                       </div>
 
                       {/* Remove Button */}
@@ -648,7 +649,7 @@ export default function PosScreen() {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                ${cartSubtotal.toFixed(2)}
+                {formatCurrency(cartSubtotal)}
               </span>
             </div>
 
@@ -792,10 +793,10 @@ export default function PosScreen() {
                       {it.quantity}
                     </td>
                     <td style={{ textAlign: 'right', padding: '6px 8px', fontVariantNumeric: 'tabular-nums' }}>
-                      ${Number(it.unit_price).toFixed(2)}
+                      {formatCurrency(it.unit_price)}
                     </td>
                     <td style={{ textAlign: 'right', padding: '6px 8px', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                      ${Number(it.subtotal).toFixed(2)}
+                      {formatCurrency(it.subtotal)}
                     </td>
                   </tr>
                 ))}
@@ -822,7 +823,7 @@ export default function PosScreen() {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                ${Number(completedSale.total_amount).toFixed(2)}
+                {formatCurrency(completedSale.total_amount)}
               </span>
             </div>
           </div>

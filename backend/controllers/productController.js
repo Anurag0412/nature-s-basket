@@ -415,10 +415,92 @@ const updateProductStatus = async (req, res) => {
     }
 };
 
+/**
+ * DELETE /api/products/:id
+ * Delete an existing product from the catalog.
+ *
+ * Rules:
+ * - Requires authentication and 'owner' role.
+ * - Validates positive integer product ID.
+ * - Checks if product exists (returns 404 if not found).
+ * - Attempts deletion using parameterized query.
+ * - If product is referenced in sales records (PostgreSQL foreign key constraint 23503),
+ *   rejects deletion with 409 Conflict and a clear message suggesting deactivation.
+ */
+const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (
+            id === undefined ||
+            isNaN(id) ||
+            !Number.isInteger(Number(id)) ||
+            Number(id) <= 0 ||
+            String(id).includes(".")
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Product ID must be a valid positive integer"
+            });
+        }
+
+        const productId = Number(id);
+
+        // Verify product existence
+        const checkQuery = `
+            SELECT product_id, product_name, status
+            FROM products
+            WHERE product_id = $1;
+        `;
+        const checkResult = await pool.query(checkQuery, [productId]);
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+        const product = checkResult.rows[0];
+
+        // Attempt deletion from PostgreSQL
+        const deleteQuery = `
+            DELETE FROM products
+            WHERE product_id = $1
+            RETURNING product_id, product_name;
+        `;
+        const deleteResult = await pool.query(deleteQuery, [productId]);
+
+        return res.status(200).json({
+            success: true,
+            message: `Product "${product.product_name}" deleted successfully`,
+            data: deleteResult.rows[0]
+        });
+    } catch (error) {
+        console.error(`Error deleting product ${req.params.id}:`, error);
+
+        // Foreign key violation error code 23503: referenced in sale_items (ON DELETE RESTRICT)
+        if (error.code === "23503") {
+            return res.status(409).json({
+                success: false,
+                message: "Cannot delete this product because it has existing sales records. You can deactivate it instead to prevent future sales while preserving transaction history.",
+                isReferenced: true
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete product",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
-    updateProductStatus
+    updateProductStatus,
+    deleteProduct
 };

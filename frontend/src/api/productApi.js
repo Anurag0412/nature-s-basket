@@ -55,10 +55,21 @@ export async function updateProductStatus(id, status) {
   return await api.patch(`/api/products/${id}/status`, { status });
 }
 
+/**
+ * Delete a product by product_id (Owner only).
+ * If the product has sales records, backend returns 409 Conflict.
+ * @param {number|string} id
+ * @returns {Promise<{ success: boolean, message: string, data?: Object }>}
+ */
+export async function deleteProduct(id) {
+  return await api.delete(`/api/products/${id}`);
+}
+
 export default {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
   updateProductStatus,
+  deleteProduct,
 };

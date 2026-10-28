@@ -16,8 +16,9 @@ import EmptyState from '../components/ui/EmptyState';
 import ErrorState from '../components/ui/ErrorState';
 import { useAuth } from '../context/useAuth';
 import { useToast } from '../context/useToast';
-import { getProducts, createProduct, updateProduct, updateProductStatus } from '../api/productApi';
+import { getProducts, createProduct, updateProduct, updateProductStatus, deleteProduct } from '../api/productApi';
 import { getCategories } from '../api/categoryApi';
+import { formatCurrency } from '../utils/currencyUtils';
 
 const PAGE_SIZE = 10;
 
@@ -58,6 +59,10 @@ export default function ProductsScreen() {
   // Status toggle confirmation
   const [statusDialogProduct, setStatusDialogProduct] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+  // Delete product confirmation
+  const [deleteDialogProduct, setDeleteDialogProduct] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load products and categories from backend
   const loadData = useCallback(async () => {
@@ -299,6 +304,30 @@ export default function ProductsScreen() {
     }
   };
 
+  // Prompt confirmation for deleting a product
+  const handleDeletePrompt = (product) => {
+    setDeleteDialogProduct(product);
+  };
+
+  // Confirm product deletion
+  const handleConfirmDelete = async () => {
+    if (!deleteDialogProduct) return;
+    const targetProduct = deleteDialogProduct;
+    setIsDeleting(true);
+    try {
+      const res = await deleteProduct(targetProduct.product_id);
+      toast.success(res.message || `Product "${targetProduct.product_name}" deleted successfully.`);
+      setDeleteDialogProduct(null);
+      await loadData();
+    } catch (err) {
+      console.error('Failed to delete product:', err);
+      setDeleteDialogProduct(null);
+      toast.error(err.message || 'Failed to delete product.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Table columns definition
   const columns = [
     {
@@ -338,7 +367,7 @@ export default function ProductsScreen() {
       align: 'right',
       render: (val) => (
         <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-          ${Number(val).toFixed(2)}
+          {formatCurrency(val)}
         </span>
       ),
     },
@@ -400,6 +429,14 @@ export default function ProductsScreen() {
             title={row.status === 'active' ? 'Deactivate product' : 'Activate product'}
           >
             {row.status === 'active' ? 'Deactivate' : 'Activate'}
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => handleDeletePrompt(row)}
+            title="Delete product permanently"
+          >
+            Delete
           </Button>
         </div>
       ),
@@ -636,11 +673,11 @@ export default function ProductsScreen() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
             <FormField
-              label="Unit Price ($)"
+              label="Unit Price (₹)"
               htmlFor="price"
               required
               error={formErrors.price}
-              hint="Selling price"
+              hint="Selling price in ₹"
             >
               <Input
                 id="price"
@@ -718,6 +755,27 @@ export default function ProductsScreen() {
           statusDialogProduct?.status === 'active' ? 'Deactivate' : 'Activate'
         }
         confirmVariant={statusDialogProduct?.status === 'active' ? 'danger' : 'primary'}
+      />
+
+      {/* Confirmation Dialog for Product Deletion */}
+      <ConfirmDialog
+        isOpen={Boolean(deleteDialogProduct)}
+        onClose={() => !isDeleting && setDeleteDialogProduct(null)}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        title="Delete Product"
+        message={
+          <div>
+            <p style={{ margin: 0, marginBottom: '8px' }}>
+              Are you sure you want to permanently delete <strong>"{deleteDialogProduct?.product_name}"</strong> (ID: #{deleteDialogProduct?.product_id})?
+            </p>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+              This will remove the product from the catalog. Note: Products already referenced in sales records cannot be deleted and should be deactivated instead to preserve historical billing invoices.
+            </p>
+          </div>
+        }
+        confirmText="Delete Product"
+        confirmVariant="danger"
       />
     </AppLayout>
   );
